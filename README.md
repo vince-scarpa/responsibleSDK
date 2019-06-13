@@ -12,3 +12,6 @@ $ cd <responsible sdk dirrectory>
 ```
 $ composer install
 ```
+### Development
+Version 1.2
+This repo is stil development if you would like to be a contributor ping me a request
