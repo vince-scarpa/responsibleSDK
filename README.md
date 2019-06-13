@@ -1,6 +1,6 @@
 # ResponsibleSDK
 PHP software development kit for ResponsibleAPI
-You can clone the repo from the below link
+You can clone the repo from the below link\
 https://github.com/vince-scarpa/responsibleAPI
 
 ## Installation
@@ -16,6 +16,5 @@ $ git clone https://github.com/vince-scarpa/responsibleSDK.git
 $ composer install
 ```
 ### Development
-Version 1.2
-
+Version 1.2\
 This repo is still in development, if you would like to be a contributor ping me a request
