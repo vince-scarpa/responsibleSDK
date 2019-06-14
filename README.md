@@ -1,7 +1,6 @@
 # ResponsibleSDK
-PHP software development kit for ResponsibleAPI
-You can clone the repo from the below link\
-https://github.com/vince-scarpa/responsibleAPI
+PHP software development kit for ResponsibleAPI.\
+To get the ResponsibleAPI server installed and runnung, please head over to this repo for instructions on how to clone and install [ResponsibleAPI](https://github.com/vince-scarpa/responsibleAPI "ResponsibleAPI")
 
 ## Installation
 Install composer if not already
