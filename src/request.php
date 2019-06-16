@@ -12,6 +12,7 @@
  * @author Vince scarpa <vince.in2net@gmail.com>
  *
  */
+namespace responsibleClient;
 
 class responsiblAPIClient
 {
