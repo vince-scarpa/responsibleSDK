@@ -12,8 +12,9 @@
  * @author Vince scarpa <vince.in2net@gmail.com>
  *
  */
+namespace responsibleClient;
 
-class cUrlErrors
+class requestError
 {
     /**
      * A list of cURL errors

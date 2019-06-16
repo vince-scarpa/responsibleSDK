@@ -203,7 +203,7 @@ class responsiblAPIClient
     private static function handleError($message)
     {
         if (ctype_digit($digit = (string) $message)) {
-            if ($errorStatus = cUrlErrors::error($digit)) {
+            if ($errorStatus = requestError::error($digit)) {
                 return [
                     'ERROR_CODE' => $digit,
                     'ERROR_STATUS' => 'CURL_ERROR',
