@@ -220,7 +220,6 @@ class responsiblAPIClient
                 $httpVersion = $split[1];
                 $VERSION = intval($httpVersion);
             }
-            exit;
         }
         return intval($VERSION);
     }
