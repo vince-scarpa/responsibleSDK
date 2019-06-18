@@ -259,7 +259,10 @@ class responsiblAPIClient
         setcookie(
             $key,
             $value,
-            time() - 86400
+            time() - 86400,
+            '/',
+            $domain,
+            false
         );
         /**
          * Set a new token cookie
