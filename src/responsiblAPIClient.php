@@ -82,7 +82,6 @@ class responsiblAPIClient
             CURLOPT_ENCODING => "",
             CURLOPT_MAXREDIRS => 10,
             CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_2_0,
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => array(
                 "Authorization: Bearer {$token}",
@@ -92,6 +91,10 @@ class responsiblAPIClient
 
         if (self::$port) {
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
+        }
+
+        if( self::getHTTPVersion() > 1 ) {
+            curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         }
 
         $response = curl_exec($curl);
@@ -139,6 +142,10 @@ class responsiblAPIClient
 
         if (self::$port) {
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
+        }
+
+        if( self::getHTTPVersion() > 1 ) {
+            curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         }
 
         $response = curl_exec($curl);
@@ -197,6 +204,25 @@ class responsiblAPIClient
         }
 
         return false;
+    }
+
+    /**
+     * [getHTTPVersion Get the servers HTTP version]
+     * @return [interger]
+     */
+    private static function getHTTPVersion()
+    {
+        $VERSION = '1';
+
+        if(isset($_SERVER['SERVER_PROTOCOL']) && !empty($_SERVER['SERVER_PROTOCOL'])) {
+            $split = preg_split("#/#", $_SERVER['SERVER_PROTOCOL']);
+            if( !empty($split) && is_array($split) && sizeof($split) == 2 ) {
+                $httpVersion = $split[1];
+                $VERSION = intval($httpVersion);
+            }
+            exit;
+        }
+        return intval($VERSION);
     }
 
     /**
