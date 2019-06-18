@@ -97,7 +97,7 @@ class responsiblAPIClient
         $response = curl_exec($curl);
 
         if ($error = curl_errno($curl)) {
-            throw new Exception($error);
+            throw new \Exception($error);
         }
 
         curl_close($curl);
@@ -144,7 +144,7 @@ class responsiblAPIClient
         $response = curl_exec($curl);
 
         if ($error = curl_errno($curl)) {
-            throw new Exception($error);
+            throw new \Exception($error);
         }
 
         curl_close($curl);
