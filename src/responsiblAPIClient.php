@@ -71,6 +71,10 @@ class responsiblAPIClient
         self::$endpoint = $url;
         $token = self::$token;
 
+        if(empty($token)) {
+            return self::accessToken();
+        }
+
         $curl = curl_init(self::$domain . self::$endpoint);
 
         curl_setopt_array($curl, array(
@@ -120,7 +124,7 @@ class responsiblAPIClient
 
         $auth_string = "{$client_id}:{$client_secret}";
 
-        $request = self::$domain . "/token/" . "access_token?grant_type=client_credentials";
+        $request = self::$domain . "/token/access_token?grant_type=client_credentials";
 
         $curl = curl_init($request);
 
