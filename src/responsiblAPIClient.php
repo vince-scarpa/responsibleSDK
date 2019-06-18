@@ -267,7 +267,7 @@ class responsiblAPIClient
         setcookie(
             $key,
             $value,
-            time() + 120,
+            time() + 300,
             '/',
             $domain,
             false
