@@ -90,7 +90,8 @@ class responsiblAPIClient
         ));
 
         if( !empty($payload) ) {
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($payload, '', '&') );
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($payload, 'flags_') );
         }
 
         if (self::$port) {
