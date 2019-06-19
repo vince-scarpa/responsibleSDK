@@ -66,7 +66,7 @@ class responsiblAPIClient
      * @param  [string] $token [The User JWT]
      * @return [object]        [Success or error json object]
      */
-    public static function request($url, $method)
+    public static function request($url, $method, array $payload = [])
     {
         self::$endpoint = $url;
         $token = self::$token;
@@ -88,6 +88,10 @@ class responsiblAPIClient
                 "cache-control: no-cache",
             ),
         ));
+
+        if( !empty($payload) ) {
+            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($payload, '', '&') );
+        }
 
         if (self::$port) {
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
@@ -319,12 +323,12 @@ class responsiblAPIClient
      * @param  [string] $token [The User JWT]
      * @return [object]        [Success or error json object]
      */
-    public static function get($url, $token)
+    public static function get($url, $token, array $payload = [])
     {
         self::$token = $token;
 
         try {
-            $response = self::request($url, 'GET');
+            $response = self::request($url, 'GET', $payload);
         } catch (\Exception $e) {
             return json_encode(
                 self::handleError($e->getMessage())
