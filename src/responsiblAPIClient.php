@@ -71,10 +71,10 @@ class responsiblAPIClient
     private static $token = '';
 
     /**
-     * [$accessed Set the accessed time]
+     * [$timeout Set the cURL timeout amount]
      * @var [type]
      */
-    private static $accessed = false;
+    private static $timeout = 30;
 
     /**
      * [__construct Client credentials setup]
@@ -111,8 +111,8 @@ class responsiblAPIClient
         curl_setopt_array($curl, array(
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
+            CURLOPT_MAXREDIRS => 3,
+            CURLOPT_TIMEOUT => self::getTimeout(),
             CURLOPT_CUSTOMREQUEST => $method,
             CURLOPT_HTTPHEADER => array(
                 "Authorization: Bearer {$token}",
@@ -171,7 +171,7 @@ class responsiblAPIClient
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_MAXREDIRS => 2,
-            CURLOPT_TIMEOUT => 2,
+            CURLOPT_TIMEOUT => 30,
             CURLOPT_USERPWD => $auth_string,
             CURLOPT_HTTPHEADER => array(
                 'Content-type: application/x-www-form-urlencoded',
@@ -311,6 +311,24 @@ class responsiblAPIClient
             }
         }
         return intval($VERSION);
+    }
+
+    /**
+     * [setTimeout Set the cURL timeout amount]
+     * @param [integer] $time [in seconds]
+     */
+    public static function setTimeout($time = 30)
+    {
+        self::$timeout = $time;
+    }
+
+    /**
+     * [getTimeout Get the cURL timeout]
+     * @return [integer]
+     */
+    private static function getTimeout()
+    {
+        return self::$timeout;
     }
 
     /**
