@@ -47,11 +47,40 @@ class responsiblAPIClient
     private static $methodsSupported = ['GET', 'POST', 'PUT'];
 
     /**
+     * [$lastRequestMethod]
+     * Set the last request method
+     * Used for method callback when refresh is called
+     *
+     * @var [type]
+     */
+    private static $lastRequestMethod;
+
+    /**
+     * [$patload]
+     * Set the payload build
+     * Used for method callback when refresh is called
+     * 
+     * @var boolean
+     */
+    private static $payload = false;
+
+    /**
      * [$token]
      * @var string
      */
     private static $token = '';
 
+    /**
+     * [$accessed Set the accessed time]
+     * @var [type]
+     */
+    private static $accessed = false;
+
+    /**
+     * [__construct Client credentials setup]
+     * @param [string] $clientID
+     * @param [string] $clientSecret
+     */
     public function __construct($clientID, $clientSecret)
     {
         self::$credentials = [
@@ -66,12 +95,14 @@ class responsiblAPIClient
      * @param  [string] $token [The User JWT]
      * @return [object]        [Success or error json object]
      */
-    public static function request($url, $method, array $payload = [])
+    public static function request($url, $method, $payload = [])
     {
+        self::methodSupported($method);
+
         self::$endpoint = $url;
         $token = self::$token;
 
-        if(empty($token)) {
+        if (empty($token)) {
             return self::accessToken();
         }
 
@@ -89,16 +120,16 @@ class responsiblAPIClient
             ),
         ));
 
-        if( !empty($payload) ) {
+        if ($method == 'POST') {
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST');
-            curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($payload, 'flags_') );
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $payload);
         }
 
         if (self::$port) {
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
         }
 
-        if( self::getHTTPVersion() > 1 ) {
+        if (self::getHTTPVersion() > 1) {
             curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         }
 
@@ -139,6 +170,8 @@ class responsiblAPIClient
         curl_setopt_array($curl, array(
             CURLOPT_POST => true,
             CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_MAXREDIRS => 2,
+            CURLOPT_TIMEOUT => 2,
             CURLOPT_USERPWD => $auth_string,
             CURLOPT_HTTPHEADER => array(
                 'Content-type: application/x-www-form-urlencoded',
@@ -149,7 +182,7 @@ class responsiblAPIClient
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
         }
 
-        if( self::getHTTPVersion() > 1 ) {
+        if (self::getHTTPVersion() > 1) {
             curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         }
 
@@ -163,14 +196,38 @@ class responsiblAPIClient
 
         if (is_object($response = json_decode($response))) {
             if ((isset($response->headerStatus) && $response->headerStatus < 400) &&
-                (isset($response->refresh_token) && !empty($response->refresh_token))) {
-                self::store('responsible_token', $response->refresh_token);
-                return self::get(self::$endpoint, $response->refresh_token);
+                (isset($response->refresh_token) && !empty($response->refresh_token))
+            ) {
+
+                self::$token = $response->refresh_token;
+                self::store('responsible_token', self::$token);
+                $callback = strtolower(self::$lastRequestMethod);
+
+                return call_user_func_array(
+                    [__CLASS__, $callback], 
+                    [self::$endpoint, self::$token, self::getPayload()]
+                );
 
             } else {
                 return json_encode($response);
             }
         }
+
+        throw new \Exception('API Request unknown error: No response returned');
+    }
+
+    /**
+     * [methodSupported Check if the request method is supported by Responsible API]
+     * @param  [string] $method [description]
+     * @return [boolean]
+     */
+    private static function methodSupported($method)
+    {
+        $method = strtoupper($method);
+        if (!in_array($method, self::$methodsSupported)) {
+            throw new \Exception('API Request method (' . $method . ') is not supported by the Responsible API');
+        }
+        self::$lastRequestMethod = $method;
     }
 
     /**
@@ -212,6 +269,33 @@ class responsiblAPIClient
     }
 
     /**
+     * [buildPostString Compress down the payload so the request is not large]
+     * @param  [array] $payload [Request body]
+     * @return [string] return a base64 encoded string with key "payload"
+     */
+    private static function buildPostString($payload)
+    {
+        self::$payload = $payload;
+
+        if (empty($payload)) {
+            $payload = json_encode("");
+        } else {
+            $payload = json_encode($payload);
+        }
+
+        return 'payload=' . base64_encode($payload);
+    }  
+
+    /**
+     * [getPayload Return the set payload]
+     * @return [string]
+     */
+    private static function getPayload()
+    {
+        return self::$payload;
+    }
+
+    /**
      * [getHTTPVersion Get the servers HTTP version]
      * @return [interger]
      */
@@ -219,9 +303,9 @@ class responsiblAPIClient
     {
         $VERSION = '1';
 
-        if(isset($_SERVER['SERVER_PROTOCOL']) && !empty($_SERVER['SERVER_PROTOCOL'])) {
+        if (isset($_SERVER['SERVER_PROTOCOL']) && !empty($_SERVER['SERVER_PROTOCOL'])) {
             $split = preg_split("#/#", $_SERVER['SERVER_PROTOCOL']);
-            if( !empty($split) && is_array($split) && sizeof($split) == 2 ) {
+            if (!empty($split) && is_array($split) && sizeof($split) == 2) {
                 $httpVersion = $split[1];
                 $VERSION = intval($httpVersion);
             }
@@ -324,12 +408,38 @@ class responsiblAPIClient
      * @param  [string] $token [The User JWT]
      * @return [object]        [Success or error json object]
      */
-    public static function get($url, $token, array $payload = [])
+    public static function get($url, $token = '', array $payload = [])
     {
         self::$token = $token;
 
         try {
+            $payload = self::buildPostString($payload);
             $response = self::request($url, 'GET', $payload);
+
+        } catch (\Exception $e) {
+            return json_encode(
+                self::handleError($e->getMessage())
+            );
+        }
+
+        return $response;
+    }
+
+    /**
+     * [post Try get an endpoint response]
+     * @param  [string] $url   [Endpoint full URL]
+     * @param  [string] $token [The User JWT]
+     * @param  [array] $payload [Request body]
+     * @return [object]        [Success or error json object]
+     */
+    public static function post($url, $token = '', array $payload = [])
+    {
+        self::$token = $token;
+
+        try {
+            $payload = self::buildPostString($payload);
+            $response = self::request($url, 'POST', $payload);
+
         } catch (\Exception $e) {
             return json_encode(
                 self::handleError($e->getMessage())
