@@ -128,7 +128,7 @@ class responsiblAPIClient
         if (self::$port) {
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
         }
-
+        
         if (self::getHTTPVersion() > 1) {
             curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         }
@@ -310,6 +310,11 @@ class responsiblAPIClient
                 $VERSION = intval($httpVersion);
             }
         }
+
+        if( isset($_SERVER['HTTP2']) && $_SERVER['HTTP2'] == 'on' ) {
+            $VERSION = 2;
+        }
+
         return intval($VERSION);
     }
 
