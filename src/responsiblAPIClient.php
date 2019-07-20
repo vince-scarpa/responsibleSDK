@@ -273,7 +273,7 @@ class responsiblAPIClient
      * @param  [array] $payload [Request body]
      * @return [string] return a base64 encoded string with key "payload"
      */
-    private static function buildPostString($payload)
+    public static function buildPostString($payload)
     {
         self::$payload = $payload;
 
