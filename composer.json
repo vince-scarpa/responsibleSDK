@@ -1,5 +1,5 @@
 {
-    "name": "ResposibleAPI SDK",
+    "name": "vince-scarpa/responsiblesdk",
     "type": "Application",
     "description": "",
     "keywords": ["php", "responsibleAPI", "SDK", "RESTfull", "api", "JWT"],
