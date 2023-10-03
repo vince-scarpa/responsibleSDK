@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ======================================
  * Responsible API Simple Client example
@@ -12,6 +13,7 @@
  * @author Vince scarpa <vince.in2net@gmail.com>
  *
  */
+
 namespace responsibleClient;
 
 class responsiblAPIClient
@@ -59,7 +61,7 @@ class responsiblAPIClient
      * [$patload]
      * Set the payload build
      * Used for method callback when refresh is called
-     * 
+     *
      * @var boolean
      */
     private static $payload = false;
@@ -128,7 +130,7 @@ class responsiblAPIClient
         if (self::$port) {
             curl_setopt($curl, CURLOPT_PROXYPORT, self::$port);
         }
-        
+
         if (self::getHTTPVersion() > 1) {
             curl_setopt($curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
         }
@@ -195,19 +197,18 @@ class responsiblAPIClient
         curl_close($curl);
 
         if (is_object($response = json_decode($response))) {
-            if ((isset($response->headerStatus) && $response->headerStatus < 400) &&
+            if (
+                (isset($response->headerStatus) && $response->headerStatus < 400) &&
                 (isset($response->refresh_token) && !empty($response->refresh_token))
             ) {
-
                 self::$token = $response->refresh_token;
                 self::store('responsible_token', self::$token);
                 $callback = strtolower(self::$lastRequestMethod);
 
                 return call_user_func_array(
-                    [__CLASS__, $callback], 
+                    [__CLASS__, $callback],
                     [self::$endpoint, self::$token, self::getPayload()]
                 );
-
             } else {
                 return json_encode($response);
             }
@@ -284,7 +285,7 @@ class responsiblAPIClient
         }
 
         return 'payload=' . base64_encode($payload);
-    }  
+    }
 
     /**
      * [getPayload Return the set payload]
@@ -311,7 +312,7 @@ class responsiblAPIClient
             }
         }
 
-        if( isset($_SERVER['HTTP2']) && $_SERVER['HTTP2'] == 'on' ) {
+        if (isset($_SERVER['HTTP2']) && $_SERVER['HTTP2'] == 'on') {
             $VERSION = 2;
         }
 
@@ -395,7 +396,7 @@ class responsiblAPIClient
          */
         setcookie(
             $key,
-            $value,
+            $value ?? '',
             time() - 86400,
             '/',
             $domain,
@@ -406,7 +407,7 @@ class responsiblAPIClient
          */
         setcookie(
             $key,
-            $value,
+            $value ?? '',
             time() + 300,
             '/',
             $domain,
@@ -438,7 +439,6 @@ class responsiblAPIClient
         try {
             $payload = self::buildPostString($payload);
             $response = self::request($url, 'GET', $payload);
-
         } catch (\Exception $e) {
             return json_encode(
                 self::handleError($e->getMessage())
@@ -462,7 +462,6 @@ class responsiblAPIClient
         try {
             $payload = self::buildPostString($payload);
             $response = self::request($url, 'POST', $payload);
-
         } catch (\Exception $e) {
             return json_encode(
                 self::handleError($e->getMessage())
